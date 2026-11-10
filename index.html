@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema POS de Ventas e Inventario | Taller 17</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+ 
+    <!-- ========== MENÚ LATERAL ========== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <span class="brand-logo">P</span>
+        <div class="brand-text">
+          <strong>POS Académico</strong>
+          <small>Ventas e inventario</small>
+        </div>
+      </div>
+ 
+      <nav class="menu" aria-label="Menú principal">
+        <button class="menu-link active" type="button" data-vista="dashboard">Dashboard</button>
+        <button class="menu-link" type="button" data-vista="ventas">Punto de venta</button>
+        <button class="menu-link" type="button" data-vista="productos">Productos e inventario</button>
+        <button class="menu-link" type="button" data-vista="comprobantes">Comprobantes</button>
+      </nav>
+ 
+      <div class="sidebar-footer">
+        <strong>Taller 17</strong>
+        <small>Programación Web Creativa II</small>
+        <small>Simulación académica: no es un sistema de cobro real</small>
+      </div>
+    </aside>
+    <div class="overlay" id="overlay"></div>
+ 
+    <!-- ========== CONTENIDO PRINCIPAL ========== -->
+    <div class="main">
+      <header class="topbar">
+        <button class="btn-menu" id="btnMenu" type="button" aria-label="Abrir o cerrar el menú">Menú</button>
+        <div class="topbar-title">
+          <h1 id="tituloVista">Dashboard</h1>
+          <p id="fechaActual"></p>
+        </div>
+        <div class="topbar-user">
+          <span class="avatar">CJ</span>
+          <div class="user-text">
+            <strong>Caja principal</strong>
+            <small>Turno activo</small>
+          </div>
+        </div>
+      </header>
+ 
+      <main class="content">
+ 
+        <!-- ===== VISTA: DASHBOARD ===== -->
+        <section class="vista activa" id="vista-dashboard">
+          <div class="kpi-grid">
+            <article class="card kpi">
+              <div class="kpi-icon azul">P</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Total de productos</span>
+                <strong class="kpi-value" id="kpiProductos">0</strong>
+              </div>
+            </article>
+            <article class="card kpi">
+              <div class="kpi-icon verde">V</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Total de ventas</span>
+                <strong class="kpi-value" id="kpiVentas">0</strong>
+              </div>
+            </article>
+            <article class="card kpi">
+              <div class="kpi-icon verde">$</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Valor acumulado</span>
+                <strong class="kpi-value" id="kpiAcumulado">$ 0</strong>
+              </div>
+            </article>
+            <article class="card kpi">
+              <div class="kpi-icon ambar">!</div>
+              <div class="kpi-body">
+                <span class="kpi-label">Productos con bajo inventario</span>
+                <strong class="kpi-value" id="kpiBajo">0</strong>
+              </div>
+            </article>
+          </div>
+ 
+          <div class="dashboard-grid">
+            <article class="card panel">
+              <h2>Alertas de inventario</h2>
+              <ul class="lista-alertas" id="listaBajo"></ul>
+            </article>
+            <article class="card panel">
+              <h2>Últimas transacciones</h2>
+              <div class="tabla-scroll">
+                <table>
+                  <thead>
+                    <tr><th>N.º</th><th>Fecha</th><th>Método</th><th class="num">Total</th></tr>
+                  </thead>
+                  <tbody id="ultimasVentas"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+ 
+        <!-- ===== VISTA: PUNTO DE VENTA ===== -->
+        <section class="vista" id="vista-ventas">
+          <div class="pos-grid">
+ 
+            <div class="pos-catalogo">
+              <div class="barra-filtros">
+                <input type="search" id="buscadorCatalogo" class="campo" placeholder="Buscar producto por nombre..." aria-label="Buscar producto por nombre">
+                <select id="filtroCategoriaCatalogo" class="campo" aria-label="Filtrar catálogo por categoría"></select>
+              </div>
+              <div class="catalogo" id="catalogo"></div>
+            </div>
+ 
+            <aside class="card carrito" aria-label="Carrito de compras">
+              <h2>Carrito de venta</h2>
+              <ul class="lista-carrito" id="listaCarrito"></ul>
+ 
+              <dl class="totales">
+                <div><dt>Subtotal</dt><dd id="resSubtotal">$ 0</dd></div>
+                <div><dt>IVA (19 %)</dt><dd id="resIva">$ 0</dd></div>
+                <div class="total-final"><dt>Total a pagar</dt><dd id="resTotal">$ 0</dd></div>
+              </dl>
+ 
+              <label class="etiqueta" for="metodoPago">Método de pago (simulado)</label>
+              <select id="metodoPago" class="campo"></select>
+ 
+              <div id="campoEfectivo">
+                <label class="etiqueta" for="montoRecibido">Efectivo recibido</label>
+                <input type="number" id="montoRecibido" class="campo" min="0" step="100" placeholder="0">
+                <p class="cambio">Cambio a devolver: <strong id="resCambio">$ 0</strong></p>
+              </div>
+ 
+              <div class="acciones-carrito">
+                <button class="btn btn-verde" id="btnRegistrar" type="button">Registrar venta</button>
+                <button class="btn btn-gris" id="btnVaciar" type="button">Vaciar carrito</button>
+              </div>
+            </aside>
+          </div>
+        </section>
+ 
+        <!-- ===== VISTA: PRODUCTOS E INVENTARIO ===== -->
+        <section class="vista" id="vista-productos">
+          <article class="card panel">
+            <h2 id="tituloFormulario">Registrar producto</h2>
+            <form id="formProducto" class="formulario" novalidate>
+              <input type="hidden" id="prodId">
+              <label class="etiqueta">Nombre
+                <input type="text" id="prodNombre" class="campo" maxlength="60" required>
+              </label>
+              <label class="etiqueta">Código o SKU
+                <input type="text" id="prodSku" class="campo" maxlength="20" required>
+              </label>
+              <label class="etiqueta">Categoría
+                <input type="text" id="prodCategoria" class="campo" list="listaCategorias" maxlength="30" required>
+                <datalist id="listaCategorias"></datalist>
+              </label>
+              <label class="etiqueta">Precio (COP, sin IVA)
+                <input type="number" id="prodPrecio" class="campo" min="1" step="1" required>
+              </label>
+              <label class="etiqueta">Cantidad disponible
+                <input type="number" id="prodCantidad" class="campo" min="0" step="1" required>
+              </label>
+              <div class="acciones-form">
+                <button class="btn btn-azul" id="btnGuardarProducto" type="submit">Guardar producto</button>
+                <button class="btn btn-gris" id="btnCancelarEdicion" type="button">Cancelar</button>
+              </div>
+            </form>
+            <p class="mensaje-form" id="mensajeForm" role="alert"></p>
+          </article>
+ 
+          <article class="card panel">
+            <div class="panel-cabecera">
+              <div>
+                <h2>Inventario</h2>
+                <p class="muted" id="resumenInventario"></p>
+              </div>
+              <div class="barra-filtros">
+                <input type="search" id="buscadorInventario" class="campo" placeholder="Buscar por nombre..." aria-label="Buscar en el inventario">
+                <select id="filtroCategoriaInventario" class="campo" aria-label="Filtrar inventario por categoría"></select>
+                <button class="btn btn-gris" id="btnRestaurar" type="button">Restaurar datos de ejemplo</button>
+              </div>
+            </div>
+            <div class="tabla-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>SKU</th><th>Producto</th><th>Categoría</th>
+                    <th class="num">Precio</th><th class="num">Existencias</th>
+                    <th>Estado</th><th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoInventario"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+ 
+        <!-- ===== VISTA: COMPROBANTES ===== -->
+        <section class="vista" id="vista-comprobantes">
+          <article class="card panel">
+            <h2>Historial de ventas</h2>
+            <div class="tabla-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>N.º</th><th>Fecha</th><th>Método</th><th class="num">Artículos</th>
+                    <th class="num">Subtotal</th><th class="num">IVA</th><th class="num">Total</th><th>Comprobante</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoHistorial"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+ 
+        <footer class="footer">
+          <p>Taller 17 · Sistema POS de Ventas e Inventario · Universidad de Caldas</p>
+          <p>Simulación académica. No procesa pagos reales ni tiene validez fiscal.</p>
+        </footer>
+      </main>
+    </div>
+  </div>
+ 
+  <!-- ========== COMPROBANTE (VENTANA MODAL) ========== -->
+  <div class="modal" id="modalComprobante" role="dialog" aria-modal="true" aria-label="Comprobante de venta">
+    <div class="modal-caja">
+      <div id="comprobanteContenido" class="comprobante"></div>
+      <div class="modal-acciones">
+        <button class="btn btn-azul" id="btnImprimir" type="button">Imprimir comprobante</button>
+        <button class="btn btn-gris" id="btnCerrarModal" type="button">Cerrar</button>
+      </div>
+    </div>
+  </div>
+ 
+  <div class="toast" id="aviso" role="status"></div>
+ 
+  <script src="script.js" defer></script>
+</body>
+</html>
